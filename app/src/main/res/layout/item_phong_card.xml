@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:background="@drawable/bg_edittext"
+    android:layout_marginBottom="10dp">
+
+    <!-- Icon phòng -->
+    <ImageView
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_room"
+        android:scaleType="centerInside"
+        android:layout_marginRight="12dp" />
+
+    <!-- Thông tin phòng (Tên, Trạng thái, Diện tích, Giá) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtTenVaTrangThai"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="P101 · Còn trống"
+            android:textColor="#222222"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtChiTietPhong"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Diện tích: 20 m²\nGiá thuê: 2,500,000 đ/tháng"
+            android:textColor="#666666"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Mũi tên phải -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="›"
+        android:textColor="#245C45"
+        android:textSize="22sp"
+        android:paddingStart="8dp" />
+
+</LinearLayout>

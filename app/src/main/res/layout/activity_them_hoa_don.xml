@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FA"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:context=".ThemHoaDonActivity">
+
+    <!-- Header Tiêu đề -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Quay lại" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Lập hóa đơn"
+            android:textColor="#26352F"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View android:layout_width="40dp" android:layout_height="1dp" />
+    </LinearLayout>
+
+    <!-- Form nhập liệu cuộn -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 1. Nhà trọ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nhà trọ"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/edtChonNhaTro"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:drawableStart="@drawable/ic_overview"
+                android:drawablePadding="10dp"
+                android:focusable="false"
+                android:clickable="true"
+                android:hint="Chọn nhà trọ..."
+                android:paddingHorizontal="14dp"
+                android:textColor="#222222"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- 2. Phòng -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phòng"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/edtChonPhong"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:drawableStart="@drawable/ic_room"
+                android:drawablePadding="10dp"
+                android:focusable="false"
+                android:clickable="true"
+                android:hint="Chọn phòng đang thuê..."
+                android:paddingHorizontal="14dp"
+                android:textColor="#222222"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- 3. Kỳ tháng -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kỳ tháng"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/edtKyThang"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:drawableEnd="@drawable/ic_calendar"
+                android:hint="11/2026"
+                android:paddingHorizontal="14dp"
+                android:textColor="#222222"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- 4. Tiền phòng -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiền phòng (đ)"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/edtTienPhong"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:inputType="numberDecimal"
+                android:hint="0"
+                android:paddingHorizontal="14dp"
+                android:textColor="#222222"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Điện đầu & Điện cuối -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginRight="6dp">
+                    <TextView android:text="Điện đầu (kWh)" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <EditText
+                        android:id="@+id/edtDienDau"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_edittext"
+                        android:inputType="number"
+                        android:text="0"
+                        android:paddingHorizontal="14dp"
+                        android:textSize="14sp"
+                        android:textColor="#222222" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="6dp">
+                    <TextView android:text="Điện cuối (kWh)" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <EditText
+                        android:id="@+id/edtDienCuoi"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_edittext"
+                        android:inputType="number"
+                        android:text="0"
+                        android:paddingHorizontal="14dp"
+                        android:textSize="14sp"
+                        android:textColor="#222222" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Nước đầu & Nước cuối -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginRight="6dp">
+                    <TextView android:text="Nước đầu (m³)" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <EditText
+                        android:id="@+id/edtNuocDau"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_edittext"
+                        android:inputType="number"
+                        android:text="0"
+                        android:paddingHorizontal="14dp"
+                        android:textSize="14sp"
+                        android:textColor="#222222" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="6dp">
+                    <TextView android:text="Nước cuối (m³)" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <EditText
+                        android:id="@+id/edtNuocCuoi"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_edittext"
+                        android:inputType="number"
+                        android:text="0"
+                        android:paddingHorizontal="14dp"
+                        android:textSize="14sp"
+                        android:textColor="#222222" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Tiền Internet -->
+            <TextView android:text="Tiền Internet (đ)" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <EditText
+                android:id="@+id/edtTienInternet"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:inputType="numberDecimal"
+                android:text="0"
+                android:paddingHorizontal="14dp"
+                android:textSize="14sp"
+                android:textColor="#222222"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Tiền dịch vụ -->
+            <TextView android:text="Tiền dịch vụ (đ)" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <EditText
+                android:id="@+id/edtTienDichVu"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:inputType="numberDecimal"
+                android:text="0"
+                android:paddingHorizontal="14dp"
+                android:textSize="14sp"
+                android:textColor="#222222"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Hạn thanh toán -->
+            <TextView android:text="Hạn thanh toán" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <EditText
+                android:id="@+id/edtHanThanhToan"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_edittext"
+                android:drawableEnd="@drawable/ic_calendar"
+                android:hint="25/11/2026"
+                android:paddingHorizontal="14dp"
+                android:textSize="14sp"
+                android:textColor="#222222"
+                android:layout_marginBottom="16dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Nút hành động đáy -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLuuNháp"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginRight="8dp"
+            android:text="Lưu nháp"
+            android:textColor="@color/forest"
+            app:strokeColor="@color/forest" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnXacNhanHoaDon"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="8dp"
+            android:backgroundTint="@color/forest"
+            android:text="Xác nhận hóa đơn"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</LinearLayout>

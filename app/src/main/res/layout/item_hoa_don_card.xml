@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="14dp"
+    android:background="@drawable/bg_edittext"
+    android:layout_marginBottom="10dp">
+
+    <!-- Thông tin hóa đơn -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtTieuDeHDItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="P101 – Nhà trọ Hoa Mai"
+            android:textColor="#222222"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtSubHDItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Linh Trăn · Kỳ 11/2026 · Chưa thanh toán"
+            android:textColor="#666666"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Tổng tiền -->
+    <TextView
+        android:id="@+id/txtGiaHDItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2.842.000 đ"
+        android:textColor="#245C45"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:paddingStart="8dp" />
+
+    <!-- Mũi tên phải (ĐÃ BỔ SUNG) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="›"
+        android:textColor="#245C45"
+        android:textSize="20sp"
+        android:paddingStart="8dp" />
+
+</LinearLayout>

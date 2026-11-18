@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FA"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:context=".ChiTietHopDongActivity">
+
+    <!-- Header Tiêu đề -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Quay lại" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Chi tiết hợp đồng"
+            android:textColor="#26352F"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="1dp" />
+    </LinearLayout>
+
+    <!-- Nội dung cuộn -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Card Thông tin hợp đồng chính -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edittext"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <!-- Tiêu đề Mã HĐ & Trạng thái -->
+                <TextView
+                    android:id="@+id/txtMaVaTrangThai"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="HĐ-HD001 · Đang hiệu lực"
+                    android:textColor="#222222"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Phòng -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Phòng" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtPhongHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="P101" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Người thuê -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Người thuê" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtNguoiDaiDienHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Linh Trăn" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Ngày bắt đầu -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Ngày bắt đầu" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtNgayBatDauHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="01/06/2026" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Ngày kết thúc -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Ngày kết thúc" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtNgayKetThucHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="31/05/2027" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Giá thuê phòng -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Giá thuê phòng" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtGiaThueHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2.500.000 đ" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Đơn giá điện -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Đơn giá điện" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtDonGiaDienHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.500 đ/kWh" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Đơn giá nước -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Đơn giá nước" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtDonGiaNuocHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="15.000 đ/m³" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Phí Internet -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Phí Internet" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtPhiInternetHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="70.000 đ" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Phí dịch vụ -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Phí dịch vụ" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtPhiDichVuHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50.000 đ" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Tiền cọc -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tiền cọc" android:textColor="#666666" android:textSize="14sp" />
+                    <TextView android:id="@+id/txtTienCocHD" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2.500.000 đ" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Tiêu đề: Thông tin người thuê -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thông tin người thuê"
+                android:textColor="#222222"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <include
+                android:id="@+id/layoutNguoiThueItem"
+                layout="@layout/item_nguoi_thue_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Hàng nút: Sửa & Gia hạn -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <Button
+                    android:id="@+id/btnSuaHopDong"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginRight="6dp"
+                    android:backgroundTint="#FFFFFF"
+                    android:text="Sửa"
+                    android:textColor="#245C45"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:strokeColor="#D5E0D5"
+                    app:strokeWidth="1dp" />
+
+                <Button
+                    android:id="@+id/btnGiaHanHopDong"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="6dp"
+                    android:backgroundTint="#FFFFFF"
+                    android:text="Gia hạn"
+                    android:textColor="#245C45"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:strokeColor="#D5E0D5"
+                    app:strokeWidth="1dp" />
+            </LinearLayout>
+
+            <!-- Nút Kết thúc hợp đồng -->
+            <Button
+                android:id="@+id/btnKetThucHopDong"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="#FFFFFF"
+                android:text="Kết thúc hợp đồng"
+                android:textColor="#245C45"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:strokeColor="#D5E0D5"
+                app:strokeWidth="1dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

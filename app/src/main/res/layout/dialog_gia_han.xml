@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Tiêu đề Dialog -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Gia hạn hợp đồng"
+        android:textColor="#26352F"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Ngày kết thúc mới -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ngày kết thúc mới"
+        android:textColor="#666666"
+        android:textSize="13sp"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/edtNgayKetThucMoi"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_edittext"
+        android:drawableEnd="@drawable/ic_calendar"
+        android:focusable="false"
+        android:clickable="true"
+        android:hint="DD/MM/YYYY"
+        android:paddingHorizontal="14dp"
+        android:textSize="15sp"
+        android:textColor="#222222"
+        android:textColorHint="#888888" />
+
+    <!-- Nút bấm Hủy & Xác nhận -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnHuyGiaHan"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginRight="8dp"
+            android:backgroundTint="#FFFFFF"
+            android:text="Hủy"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnXacNhanGiaHan"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:backgroundTint="#245C45"
+            android:text="Xác nhận"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

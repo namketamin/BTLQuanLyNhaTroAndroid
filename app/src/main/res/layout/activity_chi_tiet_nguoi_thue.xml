@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FA"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:context=".ChiTietNguoiThueActivity">
+
+    <!-- Header Tiêu đề -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Quay lại" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Chi tiết người thuê"
+            android:textColor="#26352F"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="1dp" />
+    </LinearLayout>
+
+    <!-- Nội dung cuộn được -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thông tin người thuê"
+                android:textColor="#222222"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Họ tên -->
+            <EditText
+                android:id="@+id/edtHoTen"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="Họ tên *"
+                android:inputType="textPersonName"
+                android:maxLines="1"
+                android:paddingHorizontal="14dp"
+                android:textSize="15sp"
+                android:textColor="#222222"
+                android:textColorHint="#888888" />
+
+            <!-- Số điện thoại -->
+            <EditText
+                android:id="@+id/edtSDT"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="Số điện thoại *"
+                android:inputType="phone"
+                android:maxLines="1"
+                android:paddingHorizontal="14dp"
+                android:textSize="15sp"
+                android:textColor="#222222"
+                android:textColorHint="#888888" />
+
+            <!-- CCCD -->
+            <EditText
+                android:id="@+id/edtCCCD"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="CCCD *"
+                android:inputType="number"
+                android:maxLines="1"
+                android:paddingHorizontal="14dp"
+                android:textSize="15sp"
+                android:textColor="#222222"
+                android:textColorHint="#888888" />
+
+            <!-- Ngày sinh -->
+            <EditText
+                android:id="@+id/edtNgaySinh"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_edittext"
+                android:drawableEnd="@drawable/ic_calendar"
+                android:focusable="false"
+                android:clickable="true"
+                android:hint="Ngày sinh"
+                android:paddingHorizontal="14dp"
+                android:textSize="15sp"
+                android:textColor="#222222"
+                android:textColorHint="#888888" />
+
+            <!-- Quê quán -->
+            <EditText
+                android:id="@+id/edtQueQuan"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="Quê quán"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingHorizontal="14dp"
+                android:textSize="15sp"
+                android:textColor="#222222"
+                android:textColorHint="#888888" />
+
+            <!-- Nút Lưu người thuê (Nền xanh) -->
+            <Button
+                android:id="@+id/btnLuuNguoiThue"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#245C45"
+                android:text="Lưu người thuê"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Nút Hóa đơn người thuê -->
+            <Button
+                android:id="@+id/btnHoaDon"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#FFFFFF"
+                android:text="Hóa đơn người thuê"
+                android:textColor="#245C45"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:elevation="0dp"
+                style="?attr/materialButtonOutlinedStyle" />
+
+            <!-- Nút Hợp đồng người thuê -->
+            <Button
+                android:id="@+id/btnHopDong"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#FFFFFF"
+                android:text="Hợp đồng người thuê"
+                android:textColor="#245C45"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:elevation="0dp"
+                style="?attr/materialButtonOutlinedStyle" />
+
+            <!-- Nút Xóa người thuê (Chữ đỏ) -->
+            <Button
+                android:id="@+id/btnXoaNguoiThue"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#FFFFFF"
+                android:text="Xóa người thuê"
+                android:textColor="#D32F2F"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:elevation="0dp"
+                style="?attr/materialButtonOutlinedStyle" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
