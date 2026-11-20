@@ -94,6 +94,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Thang INTEGER NOT NULL, " +
                 "Nam INTEGER NOT NULL, " +
                 "NgayLap TEXT NOT NULL, " +
+                "HanThanhToan TEXT, " +
 
                 "DienDau REAL NOT NULL, " +
                 "DienCuoi REAL NOT NULL, " +

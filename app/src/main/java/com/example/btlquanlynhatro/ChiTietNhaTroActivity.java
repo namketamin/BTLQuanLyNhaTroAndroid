@@ -37,6 +37,9 @@ public class ChiTietNhaTroActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        // Thiết lập thanh điều hướng (Tab 2 tương ứng với mục Trọ)
+        NavigationHelper.setupNav(this, 2);
+
         // Nhận MaNhaTro được truyền từ NhaTroActivity sang
         maNhaTro = getIntent().getIntExtra("MaNhaTro", -1);
 
@@ -99,6 +102,9 @@ public class ChiTietNhaTroActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(0, 0);
         });
+
+        // Thiết lập thanh điều hướng
+        NavigationHelper.setupNav(this, 2);
     }
 
     // Đổi màu nút lọc khi được chọn

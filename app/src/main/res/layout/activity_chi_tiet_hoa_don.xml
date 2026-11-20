@@ -84,6 +84,26 @@
                     <TextView android:id="@+id/txtChiTietNguoiThue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lê Hữu Dũng" android:textColor="#222222" android:textSize="14sp" android:textStyle="bold"/>
                 </LinearLayout>
 
+                <!-- Ngày lập (THÊM MỚI) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Ngày lập" android:textColor="#666666" android:textSize="14sp"/>
+                    <TextView android:id="@+id/txtChiTietNgayLap" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="15/11/2026" android:textColor="#222222" android:textSize="14sp"/>
+                </LinearLayout>
+
+                <!-- Hạn thanh toán -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Hạn thanh toán" android:textColor="#666666" android:textSize="14sp"/>
+                    <TextView android:id="@+id/txtChiTietHanThanhToan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="25/11/2026" android:textColor="#222222" android:textSize="14sp"/>
+                </LinearLayout>
+
                 <!-- Kỳ -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -121,7 +141,7 @@
                         android:id="@+id/txtChiTietSubDien"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Chỉ số 100 → 160 · 60 kWh"
+                        android:text="Chỉ số 100 → 160 · 60 kWh (Đơn giá: 3.500 đ)"
                         android:textColor="#888888"
                         android:textSize="12sp"
                         android:layout_marginTop="2dp"/>
@@ -144,7 +164,7 @@
                         android:id="@+id/txtChiTietSubNuoc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Chỉ số 20 → 28 · 8 m³"
+                        android:text="Chỉ số 20 → 28 · 8 m³ (Đơn giá: 15.000 đ)"
                         android:textColor="#888888"
                         android:textSize="12sp"
                         android:layout_marginTop="2dp"/>
@@ -219,6 +239,32 @@
                 app:strokeWidth="1dp"
                 android:text="Xuất / chia sẻ hóa đơn"
                 android:textStyle="bold"/>
+
+            <!-- Nút Sửa hóa đơn (CHỈ HIỆN KHI CHƯA THANH TOÁN) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSuaHoaDon"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#FFFFFF"
+                android:textColor="#245C45"
+                app:strokeColor="#245C45"
+                app:strokeWidth="1dp"
+                android:text="Sửa hóa đơn"
+                android:textStyle="bold" />
+
+            <!-- Nút Xóa hóa đơn (CHỈ HIỆN KHI CHƯA THANH TOÁN) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnXoaHoaDon"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#FFFFFF"
+                android:textColor="#DC2626"
+                app:strokeColor="#DC2626"
+                app:strokeWidth="1dp"
+                android:text="Xóa hóa đơn"
+                android:textStyle="bold" />
 
         </LinearLayout>
     </ScrollView>

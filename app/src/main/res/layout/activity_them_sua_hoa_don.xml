@@ -7,7 +7,7 @@
     android:background="#F8F9FA"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".ThemHoaDonActivity">
+    tools:context=".ThemSuaHoaDonActivity">
 
     <!-- Header Tiêu đề -->
     <LinearLayout
@@ -31,6 +31,7 @@
             android:contentDescription="Quay lại" />
 
         <TextView
+            android:id="@+id/txtTieuDe"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -268,17 +269,21 @@
 
             <!-- Hạn thanh toán -->
             <TextView android:text="Hạn thanh toán" android:textColor="#666666" android:textSize="12sp" android:layout_marginBottom="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <!-- Hạn thanh toán -->
             <EditText
                 android:id="@+id/edtHanThanhToan"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:background="@drawable/bg_edittext"
                 android:drawableEnd="@drawable/ic_calendar"
+                android:focusable="false"
+                android:clickable="true"
                 android:hint="25/11/2026"
                 android:paddingHorizontal="14dp"
                 android:textSize="14sp"
                 android:textColor="#222222"
                 android:layout_marginBottom="16dp" />
+
         </LinearLayout>
     </ScrollView>
 

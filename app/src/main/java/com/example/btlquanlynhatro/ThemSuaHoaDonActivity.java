@@ -1,5 +1,6 @@
 package com.example.btlquanlynhatro;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -23,29 +24,38 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ThemHoaDonActivity extends AppCompatActivity {
+public class ThemSuaHoaDonActivity extends AppCompatActivity {
 
     private EditText edtChonNhaTro, edtChonPhong, edtKyThang, edtTienPhong;
     private EditText edtDienDau, edtDienCuoi, edtNuocDau, edtNuocCuoi, edtTienInternet, edtTienDichVu, edtHanThanhToan;
+    private TextView txtTieuDe;
     private MaterialButton btnLuuNhap, btnXacNhanHoaDon;
     private DatabaseHelper dbHelper;
 
     private String maHopDong = null;
+    private String maHoaDonEdit = null;
+    private boolean isEditMode = false;
+    private String trangThaiHienTai = "Chưa thanh toán";
+
     private int selectedMaPhong = -1;
-    private double donGiaDienHD = 3500; // Giá mặc định nếu không đọc được từ hợp đồng
+    private double donGiaDienHD = 3500;
     private double donGiaNuocHD = 15000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_them_hoa_don);
+        setContentView(R.layout.activity_them_sua_hoa_don);
 
         dbHelper = new DatabaseHelper(this);
+
+        maHoaDonEdit = getIntent().getStringExtra("MaHD");
+        isEditMode = (maHoaDonEdit != null && !maHoaDonEdit.isEmpty());
 
         maHopDong = getIntent().getStringExtra("MaHopDong");
         selectedMaPhong = getIntent().getIntExtra("MaPhong", -1);
 
         ImageView btnBack = findViewById(R.id.btnBack);
+        txtTieuDe = findViewById(R.id.txtTieuDe);
         edtChonNhaTro = findViewById(R.id.edtChonNhaTro);
         edtChonPhong = findViewById(R.id.edtChonPhong);
         edtKyThang = findViewById(R.id.edtKyThang);
@@ -67,12 +77,22 @@ public class ThemHoaDonActivity extends AppCompatActivity {
 
         String currentMonthYear = new SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().getTime());
         edtKyThang.setText(currentMonthYear);
-        edtHanThanhToan.setText("25/" + currentMonthYear);
+        edtHanThanhToan.setOnClickListener(v -> showDatePicker(edtHanThanhToan));
 
-        if (maHopDong != null && !maHopDong.isEmpty()) {
+        if (isEditMode) {
+            txtTieuDe.setText("Sửa hóa đơn");
+            edtChonNhaTro.setEnabled(false);
+            edtChonPhong.setEnabled(false);
+            edtKyThang.setEnabled(false);
+            if (btnLuuNhap != null) btnLuuNhap.setVisibility(View.GONE);
+            btnXacNhanHoaDon.setText("Cập nhật hóa đơn");
+            loadThongTinHoaDonDeSua(maHoaDonEdit);
+            btnXacNhanHoaDon.setOnClickListener(v -> capNhatHoaDonTrongDB());
+        } else if (maHopDong != null && !maHopDong.isEmpty()) {
             edtChonNhaTro.setEnabled(false);
             edtChonPhong.setEnabled(false);
             loadThongTinHopDong(maHopDong);
+            btnXacNhanHoaDon.setOnClickListener(v -> luuHoaDonVaoDB("Chưa thanh toán"));
         } else {
             edtChonNhaTro.setOnClickListener(v -> hienDialogChonNhaTro());
             edtChonPhong.setOnClickListener(v -> {
@@ -84,14 +104,163 @@ public class ThemHoaDonActivity extends AppCompatActivity {
                     Toast.makeText(this, "Vui lòng bấm vào ô Nhà trọ để đổi nhà/phòng khác!", Toast.LENGTH_SHORT).show();
                 }
             });
+            btnXacNhanHoaDon.setOnClickListener(v -> luuHoaDonVaoDB("Chưa thanh toán"));
         }
-
-//        if (btnLuuNhap != null) {
-//            btnLuuNhap.setOnClickListener(v -> luuHoaDonVaoDB("Nháp"));
-//        }
-        btnXacNhanHoaDon.setOnClickListener(v -> luuHoaDonVaoDB("Chưa thanh toán"));
     }
 
+    private void loadThongTinHoaDonDeSua(String idHD) {
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            String sql = "SELECT h.MaHopDong, h.Thang, h.Nam, h.DienDau, h.DienCuoi, h.NuocDau, h.NuocCuoi, " +
+                    "h.TrangThai, h.HanThanhToan, p.MaPhong, p.TenPhong, nt.TenNhaTro, " +
+                    "hd.GiaPhong, hd.PhiInternet, hd.PhiDichVu, hd.DonGiaDien, hd.DonGiaNuoc " +
+                    "FROM HOADON h " +
+                    "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                    "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                    "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
+                    "WHERE h.MaHD = ?";
+
+            Cursor c = db.rawQuery(sql, new String[]{idHD});
+            if (c != null) {
+                if (c.moveToFirst()) {
+                    maHopDong = c.getString(0);
+                    int thang = c.getInt(1);
+                    int nam = c.getInt(2);
+                    double dienDau = c.getDouble(3);
+                    double dienCuoi = c.getDouble(4);
+                    double nuocDau = c.getDouble(5);
+                    double nuocCuoi = c.getDouble(6);
+                    trangThaiHienTai = c.getString(7) != null ? c.getString(7) : "Chưa thanh toán";
+                    String hanThanhToan = c.getString(8);
+                    selectedMaPhong = c.getInt(9);
+                    String tenPhong = c.getString(10);
+                    String tenNhaTro = c.getString(11);
+                    double giaPhong = c.getDouble(12);
+                    double phiInternet = c.getDouble(13);
+                    double phiDichVu = c.getDouble(14);
+                    donGiaDienHD = c.getDouble(15) > 0 ? c.getDouble(15) : 3500;
+                    donGiaNuocHD = c.getDouble(16) > 0 ? c.getDouble(16) : 15000;
+
+                    edtChonNhaTro.setText(tenNhaTro != null ? tenNhaTro : "");
+                    edtChonPhong.setText(tenPhong != null ? tenPhong : "");
+                    edtKyThang.setText(String.format(Locale.getDefault(), "%02d/%d", thang, nam));
+                    edtTienPhong.setText(String.valueOf((int) giaPhong));
+                    edtDienDau.setText(String.valueOf((int) dienDau));
+                    edtDienCuoi.setText(String.valueOf((int) dienCuoi));
+                    edtNuocDau.setText(String.valueOf((int) nuocDau));
+                    edtNuocCuoi.setText(String.valueOf((int) nuocCuoi));
+                    edtTienInternet.setText(String.valueOf((int) phiInternet));
+                    edtTienDichVu.setText(String.valueOf((int) phiDichVu));
+                    if (hanThanhToan != null && !hanThanhToan.isEmpty()) {
+                        edtHanThanhToan.setText(hanThanhToan);
+                    }
+                }
+                c.close();
+            }
+
+            Cursor cCT = db.rawQuery("SELECT LoaiPhi, DonGia, ThanhTien FROM CHITIETHOADON WHERE MaHD = ?", new String[]{idHD});
+            if (cCT != null) {
+                while (cCT.moveToNext()) {
+                    String loaiPhi = cCT.getString(0);
+                    double donGia = cCT.getDouble(1);
+                    double thanhTien = cCT.getDouble(2);
+                    if ("Tiền phòng".equals(loaiPhi)) {
+                        edtTienPhong.setText(String.valueOf((int) thanhTien));
+                    } else if ("Tiền điện".equals(loaiPhi)) {
+                        if (donGia > 0) donGiaDienHD = donGia;
+                    } else if ("Tiền nước".equals(loaiPhi)) {
+                        if (donGia > 0) donGiaNuocHD = donGia;
+                    } else if ("Tiền Internet".equals(loaiPhi)) {
+                        edtTienInternet.setText(String.valueOf((int) thanhTien));
+                    } else if ("Tiền dịch vụ".equals(loaiPhi)) {
+                        edtTienDichVu.setText(String.valueOf((int) thanhTien));
+                    }
+                }
+                cCT.close();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi tải dữ liệu sửa hóa đơn: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void capNhatHoaDonTrongDB() {
+        try {
+            double dienDau = parseDoubleSafe(edtDienDau.getText().toString());
+            double dienCuoi = parseDoubleSafe(edtDienCuoi.getText().toString());
+            double nuocDau = parseDoubleSafe(edtNuocDau.getText().toString());
+            double nuocCuoi = parseDoubleSafe(edtNuocCuoi.getText().toString());
+
+            if (dienCuoi < dienDau) {
+                Toast.makeText(this, "Lỗi: Chỉ số điện cuối không được nhỏ hơn chỉ số đầu!", Toast.LENGTH_SHORT).show();
+                edtDienCuoi.requestFocus();
+                return;
+            }
+            if (nuocCuoi < nuocDau) {
+                Toast.makeText(this, "Lỗi: Chỉ số nước cuối không được nhỏ hơn chỉ số đầu!", Toast.LENGTH_SHORT).show();
+                edtNuocCuoi.requestFocus();
+                return;
+            }
+
+            double tienPhong = parseDoubleSafe(edtTienPhong.getText().toString());
+            double tienInternet = parseDoubleSafe(edtTienInternet.getText().toString());
+            double tienDichVu = parseDoubleSafe(edtTienDichVu.getText().toString());
+            String hanThanhToan = edtHanThanhToan.getText().toString().trim();
+
+            double soDien = dienCuoi - dienDau;
+            double tienDien = soDien * donGiaDienHD;
+
+            double soNuoc = nuocCuoi - nuocDau;
+            double tienNuoc = soNuoc * donGiaNuocHD;
+
+            double tongTien = tienPhong + tienDien + tienNuoc + tienInternet + tienDichVu;
+
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.beginTransaction();
+            try {
+                ContentValues hdValues = new ContentValues();
+                hdValues.put("DienDau", dienDau);
+                hdValues.put("DienCuoi", dienCuoi);
+                hdValues.put("NuocDau", nuocDau);
+                hdValues.put("NuocCuoi", nuocCuoi);
+                hdValues.put("TongTien", tongTien);
+                hdValues.put("HanThanhToan", hanThanhToan);
+
+                int updated = db.update("HOADON", hdValues, "MaHD = ?", new String[]{maHoaDonEdit});
+                if (updated <= 0) {
+                    Toast.makeText(this, "Không tìm thấy hóa đơn để cập nhật!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                db.delete("CHITIETHOADON", "MaHD = ?", new String[]{maHoaDonEdit});
+                insertChiTietPhi(db, maHoaDonEdit, "Tiền phòng", 1, tienPhong, tienPhong);
+                insertChiTietPhi(db, maHoaDonEdit, "Tiền điện", soDien, donGiaDienHD, tienDien);
+                insertChiTietPhi(db, maHoaDonEdit, "Tiền nước", soNuoc, donGiaNuocHD, tienNuoc);
+                insertChiTietPhi(db, maHoaDonEdit, "Tiền Internet", 1, tienInternet, tienInternet);
+                insertChiTietPhi(db, maHoaDonEdit, "Tiền dịch vụ", 1, tienDichVu, tienDichVu);
+
+                db.setTransactionSuccessful();
+                Toast.makeText(this, "Cập nhật hóa đơn thành công! Tổng: " + String.format("%,.0f đ", tongTien), Toast.LENGTH_LONG).show();
+                finish();
+                overridePendingTransition(0, 0);
+            } finally {
+                db.endTransaction();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi cập nhật hóa đơn: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void insertChiTietPhi(SQLiteDatabase db, String idHD, String loaiPhi, double soLuong, double donGia, double thanhTien) {
+        ContentValues ct = new ContentValues();
+        ct.put("MaHD", idHD);
+        ct.put("LoaiPhi", loaiPhi);
+        ct.put("SoLuong", soLuong);
+        ct.put("DonGia", donGia);
+        ct.put("ThanhTien", thanhTien);
+        db.insert("CHITIETHOADON", null, ct);
+    }
+
+    // --- Các hàm chọn nhà trọ, phòng, hợp đồng và luuHoaDonVaoDB giữ nguyên như file gốc ---
     private void hienDialogChonNhaTro() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Chọn nhà trọ");
@@ -306,7 +475,6 @@ public class ThemHoaDonActivity extends AppCompatActivity {
             double nuocDau = parseDoubleSafe(edtNuocDau.getText().toString());
             double nuocCuoi = parseDoubleSafe(edtNuocCuoi.getText().toString());
 
-            // ===== BỔ SUNG CHECK LOGIC CHỈ SỐ =====
             if (dienCuoi < dienDau) {
                 Toast.makeText(this, "Lỗi: Chỉ số điện cuối không được nhỏ hơn chỉ số đầu!", Toast.LENGTH_SHORT).show();
                 edtDienCuoi.requestFocus();
@@ -318,7 +486,6 @@ public class ThemHoaDonActivity extends AppCompatActivity {
                 edtNuocCuoi.requestFocus();
                 return;
             }
-            // ======================================
 
             String kyThangStr = edtKyThang.getText().toString().trim();
             double tienPhong = parseDoubleSafe(edtTienPhong.getText().toString());
@@ -332,7 +499,6 @@ public class ThemHoaDonActivity extends AppCompatActivity {
                 nam = parseIntSafe(parts[1]);
             }
 
-            // Tính tiền điện nước
             double soDienTieuThu = dienCuoi - dienDau;
             double tienDien = soDienTieuThu * donGiaDienHD;
 
@@ -341,7 +507,6 @@ public class ThemHoaDonActivity extends AppCompatActivity {
 
             double tongTien = tienPhong + tienDien + tienNuoc + tienInternet + tienDichVu;
 
-            // Gọi hàm lưu vào DatabaseHelper như cũ...
             boolean success = dbHelper.themHoaDon(
                     maHopDong, thang, nam, tienPhong,
                     dienDau, dienCuoi, donGiaDienHD,
@@ -361,6 +526,20 @@ public class ThemHoaDonActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi nhập liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showDatePicker(EditText edtTarget) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        new android.app.DatePickerDialog(
+                this,
+                (datePicker, year, month, day) -> {
+                    String formattedDate = String.format(java.util.Locale.getDefault(), "%02d/%02d/%d", day, (month + 1), year);
+                    edtTarget.setText(formattedDate);
+                },
+                calendar.get(java.util.Calendar.YEAR),
+                calendar.get(java.util.Calendar.MONTH),
+                calendar.get(java.util.Calendar.DAY_OF_MONTH)
+        ).show();
     }
 
     private double parseDoubleSafe(String val) {

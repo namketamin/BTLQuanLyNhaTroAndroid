@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -56,7 +55,7 @@ public class HoaDonActivity extends AppCompatActivity {
 
         // Ánh xạ View
         btnBack = findViewById(R.id.btnBack);
-        txtTieuDeTrang=findViewById(R.id.txtTieuDeTrang);
+        txtTieuDeTrang = findViewById(R.id.txtTieuDeTrang);
         // ===== THÊM ĐOẠN NÀY ĐỂ ẨN/HIỆN NÚT BACK TÙY THEO NGỮ CẢNH =====
         if ("PHONG".equals(type)) {
             // Nếu đi từ trang chi tiết phòng sang, hiện nút Back
@@ -100,7 +99,7 @@ public class HoaDonActivity extends AppCompatActivity {
 
         if (btnThemHoaDon != null) {
             btnThemHoaDon.setOnClickListener(v -> {
-                Intent intent = new Intent(HoaDonActivity.this, ThemHoaDonActivity.class);
+                Intent intent = new Intent(HoaDonActivity.this, ThemSuaHoaDonActivity.class);
                 if ("PHONG".equals(type)) {
                     intent.putExtra("MaHopDong", maHopDongHieuLuc);
                 }
@@ -121,13 +120,17 @@ public class HoaDonActivity extends AppCompatActivity {
         if (edtSearchHoaDon != null) {
             edtSearchHoaDon.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     loadDanhSachHoaDon(s.toString().trim());
                 }
+
                 @Override
-                public void afterTextChanged(Editable s) {}
+                public void afterTextChanged(Editable s) {
+                }
             });
         }
     }
@@ -279,6 +282,7 @@ public class HoaDonActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadDanhSachHoaDon("");
+        String currentKeyword = (edtSearchHoaDon != null) ? edtSearchHoaDon.getText().toString().trim() : "";
+        loadDanhSachHoaDon(currentKeyword);
     }
 }

@@ -234,7 +234,6 @@ public class NhaTroActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         if (dbHelper != null && layoutDanhSachNhaTro != null) {
             loadDanhSachNhaTro();
         }

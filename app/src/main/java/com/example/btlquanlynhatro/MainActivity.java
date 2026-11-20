@@ -1,10 +1,11 @@
 package com.example.btlquanlynhatro;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,9 +43,13 @@ public class MainActivity extends AppCompatActivity {
         // Tải số liệu thống kê phòng
         loadStatistics();
 
+
         btnCreateBill.setOnClickListener(v -> {
-            Toast.makeText(this, "Chuyển sang màn hình lập hóa đơn...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, ThemSuaHoaDonActivity.class);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
         });
+
     }
 
     //Load thống kê
