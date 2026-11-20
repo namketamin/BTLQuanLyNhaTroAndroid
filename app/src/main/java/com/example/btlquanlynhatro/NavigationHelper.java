@@ -51,8 +51,9 @@ public class NavigationHelper {
         }
         if (menuStats != null && currentTabId != 4) {
             menuStats.setOnClickListener(v -> {
-                // activity.startActivity(new Intent(activity, ThongKeActivity.class));
-                // activity.finish();
+                 activity.startActivity(new Intent(activity, ThongKeActivity.class));
+                 activity.finish();
+                 activity.overridePendingTransition(0, 0);
             });
         }
         if (menuProfile != null && currentTabId != 5) {
