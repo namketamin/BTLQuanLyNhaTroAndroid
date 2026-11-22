@@ -498,7 +498,11 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                 thang = parseIntSafe(parts[0]);
                 nam = parseIntSafe(parts[1]);
             }
-
+            if (isTrungHoaDonCuaPhong(maHopDong, thang, nam)) {
+                Toast.makeText(this, "Phòng này đã có hóa đơn kỳ " + thang + "/" + nam + " rồi!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            
             double soDienTieuThu = dienCuoi - dienDau;
             double tienDien = soDienTieuThu * donGiaDienHD;
 
@@ -526,6 +530,23 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi nhập liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private boolean isTrungHoaDonCuaPhong(String idHopDong, int thang, int nam) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT COUNT(*) FROM HOADON h " +
+                "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                "WHERE hd.MaPhong = (SELECT MaPhong FROM HOPDONG WHERE MaHopDong = ?) " +
+                "AND h.Thang = ? AND h.Nam = ?";
+        Cursor c = db.rawQuery(sql, new String[]{idHopDong, String.valueOf(thang), String.valueOf(nam)});
+        boolean trung = false;
+        if (c != null) {
+            if (c.moveToFirst() && c.getInt(0) > 0) {
+                trung = true;
+            }
+            c.close();
+        }
+        return trung;
     }
 
     private void showDatePicker(EditText edtTarget) {
