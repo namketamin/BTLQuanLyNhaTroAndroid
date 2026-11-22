@@ -16,7 +16,6 @@ public class LoginActivity extends AppCompatActivity {
     private TextView txtForgotPassword, txtGuest;
     private DatabaseHelper dbHelper;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         int savedMaTK = prefs.getInt("MaTK", -1);
 
         if (savedMaTK != -1) {
-            navigateToMain();
+            navigateByRole(savedMaTK);
             return;
         }
 
@@ -67,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Đăng nhập thành công!",
                         Toast.LENGTH_SHORT).show();
 
-                navigateToMain();
+                navigateByRole(maTK);
             } else {
                 Toast.makeText(this,
                         "Tên đăng nhập hoặc mật khẩu không chính xác!",
@@ -90,10 +89,15 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-
-    private void navigateToMain() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+    private void navigateByRole(int maTK) {
+        String vaiTro = dbHelper.getVaiTro(maTK);
+        Intent intent;
+        if ("Admin".equalsIgnoreCase(vaiTro)) {
+            intent = new Intent(LoginActivity.this, ProfileActivity.class);
+        } else {
+            intent = new Intent(LoginActivity.this, MainActivity.class);
+        }
         startActivity(intent);
-        finish(); // Đóng Activity đăng nhập để người dùng không bấm back quay lại được
+        finish();
     }
 }

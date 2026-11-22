@@ -1,5 +1,6 @@
 package com.example.btlquanlynhatro;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -27,6 +28,7 @@ public class ThongKeActivity extends AppCompatActivity {
     private LinearLayout layoutCoCauKhoanThu;
     private DatabaseHelper dbHelper;
 
+    private int maTK = -1;
     private String selectedThang = "Tất cả";
     private String selectedNam = "Tất cả";
     private int selectedMaNhaTro = -1;
@@ -38,7 +40,9 @@ public class ThongKeActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
-        // Chỉnh index tab cho khớp với NavigationHelper của cậu
+        SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
+        maTK = prefs.getInt("MaTK", -1);
+
         NavigationHelper.setupNav(this, 4);
 
         ImageView btnBack = findViewById(R.id.btnBack);
@@ -89,7 +93,14 @@ public class ThongKeActivity extends AppCompatActivity {
         namList.add("Tất cả");
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT DISTINCT Nam FROM HOADON ORDER BY Nam DESC", null);
+        Cursor cursor = db.rawQuery(
+                "SELECT DISTINCT h.Nam FROM HOADON h " +
+                        "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                        "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                        "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
+                        "WHERE nt.MaTK = ? ORDER BY h.Nam DESC",
+                new String[]{String.valueOf(maTK)}
+        );
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 String nam = String.valueOf(cursor.getInt(0));
@@ -123,7 +134,10 @@ public class ThongKeActivity extends AppCompatActivity {
         tenList.add("Tất cả");
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MaNhaTro, TenNhaTro FROM NHATRO", null);
+        Cursor cursor = db.rawQuery(
+                "SELECT MaNhaTro, TenNhaTro FROM NHATRO WHERE MaTK = ?",
+                new String[]{String.valueOf(maTK)}
+        );
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 idList.add(cursor.getInt(0));
@@ -146,8 +160,9 @@ public class ThongKeActivity extends AppCompatActivity {
     private void capNhatThongKe() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        StringBuilder whereHD = new StringBuilder(" WHERE 1=1 ");
+        StringBuilder whereHD = new StringBuilder(" WHERE nt.MaTK = ? ");
         List<String> argsHD = new ArrayList<>();
+        argsHD.add(String.valueOf(maTK));
 
         if (!selectedThang.equals("Tất cả")) {
             whereHD.append(" AND h.Thang = ? ");
@@ -166,6 +181,7 @@ public class ThongKeActivity extends AppCompatActivity {
                 "FROM HOADON h " +
                 "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
                 "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
                 whereHD +
                 " GROUP BY h.TrangThai";
 
@@ -186,13 +202,17 @@ public class ThongKeActivity extends AppCompatActivity {
         txtTongDaThu.setText(String.format(Locale.getDefault(), "%,.0f đ", daThu));
         txtTongCongNo.setText(String.format(Locale.getDefault(), "%,.0f đ", congNo));
 
-        String sqlPhong = "SELECT COUNT(*), SUM(CASE WHEN TrangThai = 'Đã thuê' THEN 1 ELSE 0 END) FROM PHONG";
-        String[] argsPhong = null;
+        StringBuilder sqlPhong = new StringBuilder(
+                "SELECT COUNT(*), SUM(CASE WHEN p.TrangThai = 'Đã thuê' THEN 1 ELSE 0 END) " +
+                        "FROM PHONG p JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro WHERE nt.MaTK = ?"
+        );
+        List<String> argsPhong = new ArrayList<>();
+        argsPhong.add(String.valueOf(maTK));
         if (selectedMaNhaTro != -1) {
-            sqlPhong += " WHERE MaNhaTro = ?";
-            argsPhong = new String[]{String.valueOf(selectedMaNhaTro)};
+            sqlPhong.append(" AND p.MaNhaTro = ?");
+            argsPhong.add(String.valueOf(selectedMaNhaTro));
         }
-        Cursor cPhong = db.rawQuery(sqlPhong, argsPhong);
+        Cursor cPhong = db.rawQuery(sqlPhong.toString(), argsPhong.toArray(new String[0]));
         if (cPhong != null && cPhong.moveToFirst()) {
             int tongPhong = cPhong.getInt(0);
             int daThue = cPhong.getInt(1);
@@ -214,6 +234,7 @@ public class ThongKeActivity extends AppCompatActivity {
                 "JOIN HOADON h ON ct.MaHD = h.MaHD " +
                 "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
                 "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
                 whereClause +
                 " GROUP BY ct.LoaiPhi ORDER BY SUM(ct.ThanhTien) DESC";
 

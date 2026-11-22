@@ -89,7 +89,7 @@
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="@color/forest"
                 android:elevation="1dp"
-                android:text="CẬP NHẬT HỒ SƠ"
+                android:text="Cập nhật hồ sơ"
                 android:textStyle="bold" />
 
             <!-- Nút Đổi mật khẩu -->
@@ -100,8 +100,20 @@
                 android:layout_marginBottom="12dp"
                 android:backgroundTint="@color/forest"
                 android:elevation="1dp"
-                android:text="ĐỔI MẬT KHẨU"
+                android:text="Đổi mật khẩu"
                 android:textStyle="bold" />
+
+            <!-- Nút dành riêng cho Admin -->
+            <Button
+                android:id="@+id/btnQuanLyChuTro"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="@color/forest"
+                android:elevation="1dp"
+                android:text="Quản lý tài khoản chủ trọ"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <!-- Nút Đăng xuất -->
             <Button
@@ -111,7 +123,7 @@
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="#FFFFFF"
                 android:elevation="1dp"
-                android:text="ĐĂNG XUẤT"
+                android:text="Đăng xuất"
                 android:textColor="#E74C3C"
                 android:textStyle="bold" />
 
@@ -119,6 +131,7 @@
     </ScrollView>
 
     <!-- Thanh Menu Đáy dùng chung (Tab 5: Cá nhân) -->
-    <include layout="@layout/layout_bottom_nav" />
+    <include android:id="@+id/layoutBottomNav"
+        layout="@layout/layout_bottom_nav" />
 
 </LinearLayout>

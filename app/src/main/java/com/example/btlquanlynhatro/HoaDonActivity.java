@@ -1,7 +1,9 @@
 package com.example.btlquanlynhatro;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,15 +14,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.database.sqlite.SQLiteDatabase;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 public class HoaDonActivity extends AppCompatActivity {
 
@@ -31,11 +33,11 @@ public class HoaDonActivity extends AppCompatActivity {
     private MaterialButton btnThemHoaDon;
     private DatabaseHelper dbHelper;
 
+    private int maTK = -1;
     private String type = "ALL";
     private int maPhong = -1;
     private String maHopDongHieuLuc = null;
 
-    // Biến lưu giá trị lọc hiện tại
     private String selectedThang = "Tất cả";
     private String selectedNam = "Tất cả";
     private String selectedTrangThai = "Tất cả";
@@ -47,18 +49,18 @@ public class HoaDonActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
+        maTK = prefs.getInt("MaTK", -1);
+
         NavigationHelper.setupNav(this, 3);
 
         type = getIntent().getStringExtra("TYPE");
         if (type == null) type = "ALL";
         maPhong = getIntent().getIntExtra("MaPhong", -1);
 
-        // Ánh xạ View
         btnBack = findViewById(R.id.btnBack);
         txtTieuDeTrang = findViewById(R.id.txtTieuDeTrang);
-        // ===== THÊM ĐOẠN NÀY ĐỂ ẨN/HIỆN NÚT BACK TÙY THEO NGỮ CẢNH =====
         if ("PHONG".equals(type)) {
-            // Nếu đi từ trang chi tiết phòng sang, hiện nút Back
             btnBack.setVisibility(View.VISIBLE);
             String tenPhongQuery = getTenPhongById(maPhong);
             if (tenPhongQuery != null && !tenPhongQuery.isEmpty()) {
@@ -67,7 +69,6 @@ public class HoaDonActivity extends AppCompatActivity {
                 txtTieuDeTrang.setText("Hóa đơn phòng");
             }
         } else {
-            // Nếu xem toàn bộ hóa đơn từ menu chính, tắt nút Back
             btnBack.setVisibility(View.GONE);
         }
 
@@ -108,15 +109,12 @@ public class HoaDonActivity extends AppCompatActivity {
             });
         }
 
-        // --- GẮN SỰ KIỆN BẬM CHỌN BỘ LỌC ---
         txtFilterThang.setOnClickListener(v -> hienDialogChonThang());
         txtFilterNam.setOnClickListener(v -> hienDialogChonNam());
         txtFilterTrangThai.setOnClickListener(v -> hienDialogChonTrangThai());
 
-        // Tải danh sách ban đầu
         loadDanhSachHoaDon("");
 
-        // Tìm kiếm realtime theo từ khóa
         if (edtSearchHoaDon != null) {
             edtSearchHoaDon.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -135,9 +133,6 @@ public class HoaDonActivity extends AppCompatActivity {
         }
     }
 
-    // ==========================================
-    // CÁC HÀM DIALOG CHỌN BỘ LỌC
-    // ==========================================
     private void hienDialogChonThang() {
         String[] options = {"Tất cả", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
         new AlertDialog.Builder(this)
@@ -151,12 +146,18 @@ public class HoaDonActivity extends AppCompatActivity {
     }
 
     private void hienDialogChonNam() {
-        // 1. Truy vấn SQLite để lấy danh sách các năm độc lập có trong bảng HOADON
         List<String> namList = new ArrayList<>();
         namList.add("Tất cả");
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT DISTINCT Nam FROM HOADON ORDER BY Nam DESC", null);
+        Cursor cursor = db.rawQuery(
+                "SELECT DISTINCT h.Nam FROM HOADON h " +
+                        "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                        "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                        "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
+                        "WHERE nt.MaTK = ? ORDER BY h.Nam DESC",
+                new String[]{String.valueOf(maTK)}
+        );
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 String nam = String.valueOf(cursor.getInt(0));
@@ -167,16 +168,13 @@ public class HoaDonActivity extends AppCompatActivity {
             cursor.close();
         }
 
-        // Đảm bảo luôn có ít nhất năm hiện tại (ví dụ: 2026) trong danh sách cho dù chưa có hóa đơn nào
         String currentYear = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
         if (!namList.contains(currentYear)) {
-            namList.add(1, currentYear); // Chèn vào vị trí ngay sau "Tất cả"
+            namList.add(1, currentYear);
         }
 
-        // Chuyển List thành mảng String[] để truyền vào AlertDialog
         String[] options = namList.toArray(new String[0]);
 
-        // 2. Hiển thị Dialog chọn năm
         new AlertDialog.Builder(this)
                 .setTitle("Chọn năm")
                 .setItems(options, (dialog, which) -> {
@@ -199,9 +197,6 @@ public class HoaDonActivity extends AppCompatActivity {
                 .show();
     }
 
-    // ==========================================
-    // TẢI DANH SÁCH VÀ LỌC DỮ LIỆU
-    // ==========================================
     private void loadDanhSachHoaDon(String keyword) {
         layoutContainerHoaDon.removeAllViews();
         Cursor cursor = null;
@@ -209,7 +204,7 @@ public class HoaDonActivity extends AppCompatActivity {
         if ("PHONG".equals(type)) {
             cursor = dbHelper.getHoaDonByPhong(maPhong, keyword);
         } else {
-            cursor = dbHelper.getAllHoaDon(keyword);
+            cursor = dbHelper.getHoaDonByChuTro(maTK, keyword);
         }
 
         if (cursor != null) {
@@ -224,7 +219,6 @@ public class HoaDonActivity extends AppCompatActivity {
                     double tongTien = cursor.getDouble(6);
                     String trangThaiHD = cursor.getString(7);
 
-                    // --- XỬ LÝ LỌC NÂNG CAO THEO THÁNG, NĂM, TRẠNG THÁI ---
                     if (!selectedThang.equals("Tất cả") && thang != Integer.parseInt(selectedThang)) {
                         continue;
                     }
@@ -234,7 +228,6 @@ public class HoaDonActivity extends AppCompatActivity {
                     if (!selectedTrangThai.equals("Tất cả") && !trangThaiHD.equalsIgnoreCase(selectedTrangThai)) {
                         continue;
                     }
-                    // -----------------------------------------------------
 
                     String kyThangNam = "Kỳ " + thang + "/" + nam;
 
@@ -265,7 +258,6 @@ public class HoaDonActivity extends AppCompatActivity {
         }
     }
 
-    // Hàm phụ trợ lấy tên phòng theo mã phòng
     private String getTenPhongById(int maPhongId) {
         String tenPhong = "";
         SQLiteDatabase db = dbHelper.getReadableDatabase();

@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtGreeting, txtTotalRooms, txtRentedRooms, txtVacantRooms, txtRevenue, txtDebt;
     private Button btnCreateBill;
     private DatabaseHelper dbHelper;
+    private int maTK = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,48 +33,46 @@ public class MainActivity extends AppCompatActivity {
         txtDebt = findViewById(R.id.txtDebt);
         btnCreateBill = findViewById(R.id.btnCreateBill);
 
-        // Lấy tên chủ nhà từ phiên đăng nhập
+        // Lấy MaTK và tên chủ nhà từ phiên đăng nhập
         SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
-        int maTK = prefs.getInt("MaTK", -1);
+        maTK = prefs.getInt("MaTK", -1);
         if (maTK != -1) {
             String hoTen = dbHelper.getHoTenChuTro(maTK);
             txtGreeting.setText("Xin chào, " + hoTen + "!");
         }
 
-        // Tải số liệu thống kê phòng
+        // Tải số liệu thống kê phòng theo chủ trọ
         loadStatistics();
-
 
         btnCreateBill.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ThemSuaHoaDonActivity.class);
             startActivity(intent);
             overridePendingTransition(0, 0);
         });
-
     }
 
-    //Load thống kê
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadStatistics();
+    }
+
     private void loadStatistics() {
-        // 1. Thống kê phòng
-        int total = dbHelper.getTongSoPhong();
-        int rented = dbHelper.getPhongDangThuê();
-        int vacant = dbHelper.getPhongTrong();
+        int total = dbHelper.getTongSoPhongByChuTro(maTK);
+        int rented = dbHelper.getPhongDangThueByChuTro(maTK);
+        int vacant = dbHelper.getPhongTrongByChuTro(maTK);
 
         txtTotalRooms.setText(String.valueOf(total));
         txtRentedRooms.setText(String.valueOf(rented));
         txtVacantRooms.setText(String.valueOf(vacant));
 
-        // 2. Lấy tháng và năm hiện tại
         java.util.Calendar calendar = java.util.Calendar.getInstance();
-
         int thang = calendar.get(java.util.Calendar.MONTH) + 1;
         int nam = calendar.get(java.util.Calendar.YEAR);
 
-        // 3. Lấy doanh thu và công nợ từ database
-        double doanhThu = dbHelper.getTongDoanhThuThang(thang, nam);
-        double congNo = dbHelper.getTongCongNo();
+        double doanhThu = dbHelper.getTongDoanhThuThangByChuTro(maTK, thang, nam);
+        double congNo = dbHelper.getTongCongNoByChuTro(maTK);
 
-        // 4. Hiển thị lên giao diện
         txtRevenue.setText(String.format("%,.0f đ", doanhThu));
         txtDebt.setText(String.format("%,.0f đ", congNo));
     }

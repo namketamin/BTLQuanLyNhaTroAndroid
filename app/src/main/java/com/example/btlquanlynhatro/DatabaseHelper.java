@@ -780,4 +780,211 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("ThanhTien", soLuong * donGia);
         db.insert("CHITIETHOADON", null, values);
     }
+
+    // Xử lý cho Preferences
+    public int getTongSoPhongByChuTro(int maTK) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM PHONG p JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro WHERE nt.MaTK = ?",
+                new String[]{String.valueOf(maTK)}
+        );
+        int count = 0;
+        if (cursor.moveToFirst()) count = cursor.getInt(0);
+        cursor.close();
+        return count;
+    }
+
+    public int getPhongDangThueByChuTro(int maTK) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM PHONG p JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro WHERE nt.MaTK = ? AND p.TrangThai = 'Đã thuê'",
+                new String[]{String.valueOf(maTK)}
+        );
+        int count = 0;
+        if (cursor.moveToFirst()) count = cursor.getInt(0);
+        cursor.close();
+        return count;
+    }
+
+    public int getPhongTrongByChuTro(int maTK) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM PHONG p JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro WHERE nt.MaTK = ? AND p.TrangThai = 'Còn trống'",
+                new String[]{String.valueOf(maTK)}
+        );
+        int count = 0;
+        if (cursor.moveToFirst()) count = cursor.getInt(0);
+        cursor.close();
+        return count;
+    }
+
+    public double getTongDoanhThuThangByChuTro(int maTK, int thang, int nam) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COALESCE(SUM(h.TongTien), 0) " +
+                        "FROM HOADON h " +
+                        "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                        "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                        "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
+                        "WHERE nt.MaTK = ? AND h.TrangThai = 'Đã thanh toán' AND h.Thang = ? AND h.Nam = ?",
+                new String[]{String.valueOf(maTK), String.valueOf(thang), String.valueOf(nam)}
+        );
+        double total = 0;
+        if (cursor.moveToFirst()) total = cursor.getDouble(0);
+        cursor.close();
+        return total;
+    }
+
+    public double getTongCongNoByChuTro(int maTK) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COALESCE(SUM(h.TongTien), 0) " +
+                        "FROM HOADON h " +
+                        "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                        "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                        "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
+                        "WHERE nt.MaTK = ? AND h.TrangThai = 'Chưa thanh toán'",
+                new String[]{String.valueOf(maTK)}
+        );
+        double total = 0;
+        if (cursor.moveToFirst()) total = cursor.getDouble(0);
+        cursor.close();
+        return total;
+    }
+
+    public Cursor getHoaDonByChuTro(int maTK, String keyword) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        StringBuilder query = new StringBuilder(
+                "SELECT h.MaHD, p.TenPhong, nt.TenNhaTro, n.HoTen, h.Thang, h.Nam, h.TongTien, h.TrangThai " +
+                        "FROM HOADON h " +
+                        "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
+                        "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
+                        "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
+                        "JOIN NGUOITHUE n ON hd.MaNguoiThue = n.MaNguoiThue " +
+                        "WHERE nt.MaTK = ?"
+        );
+        List<String> args = new ArrayList<>();
+        args.add(String.valueOf(maTK));
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            query.append(" AND (h.MaHD LIKE ? OR n.HoTen LIKE ? OR p.TenPhong LIKE ?)");
+            String k = "%" + keyword.trim() + "%";
+            args.add(k);
+            args.add(k);
+            args.add(k);
+        }
+        query.append(" ORDER BY h.MaHD DESC");
+        return db.rawQuery(query.toString(), args.toArray(new String[0]));
+    }
+
+    // PROFILE
+    // Cập nhật thông tin hồ sơ tài khoản (HoTen, SDT, Email)
+    public boolean updateProfile(int maTK, String hoTen, String sdt, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("HoTen", hoTen);
+        values.put("SDT", sdt);
+        values.put("Email", email);
+        int rows = db.update("TAIKHOAN", values, "MaTK = ?", new String[]{String.valueOf(maTK)});
+        return rows > 0;
+    }
+
+    // Đổi mật khẩu (Kiểm tra mật khẩu cũ khớp mới cho đổi)
+    public boolean changePassword(int maTK, String oldPass, String newPass) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT MaTK FROM TAIKHOAN WHERE MaTK = ? AND MatKhau = ?",
+                new String[]{String.valueOf(maTK), oldPass}
+        );
+        boolean isMatch = false;
+        if (cursor != null) {
+            isMatch = cursor.moveToFirst();
+            cursor.close();
+        }
+        if (!isMatch) {
+            return false; // Sai mật khẩu cũ
+        }
+
+        ContentValues values = new ContentValues();
+        values.put("MatKhau", newPass);
+        int rows = db.update("TAIKHOAN", values, "MaTK = ?", new String[]{String.valueOf(maTK)});
+        return rows > 0;
+    }
+
+    // ==========================================
+    // QUẢN LÝ TÀI KHOẢN CHỦ TRỌ (DÀNH CHO ADMIN)
+    // ==========================================
+
+    // Lấy danh sách tài khoản chủ trọ (hỗ trợ tìm kiếm theo Họ tên, Tên đăng nhập, SĐT)
+    public Cursor getDanhSachChuTro(String keyword) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        StringBuilder sql = new StringBuilder(
+                "SELECT MaTK, TenDangNhap, HoTen, SDT, Email, TrangThai FROM TAIKHOAN WHERE VaiTro = 'Chủ trọ'"
+        );
+        List<String> args = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (HoTen LIKE ? OR TenDangNhap LIKE ? OR SDT LIKE ?)");
+            String pattern = "%" + keyword.trim() + "%";
+            args.add(pattern);
+            args.add(pattern);
+            args.add(pattern);
+        }
+        sql.append(" ORDER BY MaTK DESC");
+        return db.rawQuery(sql.toString(), args.toArray(new String[0]));
+    }
+
+    // Kiểm tra trùng tên đăng nhập
+    public boolean isTenDangNhapTonTai(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT MaTK FROM TAIKHOAN WHERE TenDangNhap = ?", new String[]{username});
+        boolean exists = false;
+        if (c != null) {
+            exists = c.moveToFirst();
+            c.close();
+        }
+        return exists;
+    }
+
+    // Thêm tài khoản chủ trọ mới
+    public long themTaiKhoanChuTro(String tenDangNhap, String matKhau, String hoTen, String sdt, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("TenDangNhap", tenDangNhap);
+        values.put("MatKhau", matKhau);
+        values.put("VaiTro", "Chủ trọ");
+        values.put("HoTen", hoTen);
+        values.put("SDT", sdt);
+        values.put("Email", email);
+        values.put("TrangThai", "Hoạt động");
+        return db.insert("TAIKHOAN", null, values);
+    }
+
+    // Khóa / Mở khóa tài khoản
+    public boolean updateTrangThaiTaiKhoan(int maTK, String trangThaiMoi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("TrangThai", trangThaiMoi);
+        return db.update("TAIKHOAN", values, "MaTK = ?", new String[]{String.valueOf(maTK)}) > 0;
+    }
+
+    // Đặt lại mật khẩu cho chủ trọ
+    public boolean resetMatKhauTaiKhoan(int maTK, String matKhauMoi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("MatKhau", matKhauMoi);
+        return db.update("TAIKHOAN", values, "MaTK = ?", new String[]{String.valueOf(maTK)}) > 0;
+    }
+    // Cập nhật thông tin tài khoản chủ trọ (nếu matKhauMoi không rỗng thì cập nhật luôn mật khẩu)
+    public boolean updateThongTinChuTro(int maTK, String hoTen, String sdt, String email, String trangThai, String matKhauMoi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("HoTen", hoTen);
+        values.put("SDT", sdt);
+        values.put("Email", email);
+        values.put("TrangThai", trangThai);
+        if (matKhauMoi != null && !matKhauMoi.isEmpty()) {
+            values.put("MatKhau", matKhauMoi);
+        }
+        return db.update("TAIKHOAN", values, "MaTK = ?", new String[]{String.valueOf(maTK)}) > 0;
+    }
 }
