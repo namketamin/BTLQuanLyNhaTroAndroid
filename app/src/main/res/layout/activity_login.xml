@@ -21,11 +21,11 @@
             android:background="#F0F2F5">
 
             <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:src="@android:drawable/ic_menu_myplaces"
-                android:tint="#888888" />
+                android:src="@drawable/login_img"
+                 />
         </FrameLayout>
 
         <!-- Form nhập liệu chính -->
