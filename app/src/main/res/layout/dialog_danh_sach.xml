@@ -17,6 +17,11 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
+    <!-- Nhét thẳng ô tìm kiếm của cậu vào -->
+    <include
+        android:id="@+id/edtSearch"
+        layout="@layout/layout_search" />
+
     <!-- Khu vực danh sách cuộn các item -->
     <ScrollView
         android:layout_width="match_parent"

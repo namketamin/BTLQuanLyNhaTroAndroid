@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +32,7 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
     private TextView txtTieuDe;
     private MaterialButton btnLuuNhap, btnXacNhanHoaDon;
     private DatabaseHelper dbHelper;
+    private int maTK = -1;
 
     private String maHopDong = null;
     private String maHoaDonEdit = null;
@@ -47,6 +49,9 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         setContentView(R.layout.activity_them_sua_hoa_don);
 
         dbHelper = new DatabaseHelper(this);
+
+        SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
+        maTK = prefs.getInt("MaTK", -1);
 
         maHoaDonEdit = getIntent().getStringExtra("MaHD");
         isEditMode = (maHoaDonEdit != null && !maHoaDonEdit.isEmpty());
@@ -261,43 +266,38 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
     }
 
     // --- Các hàm chọn nhà trọ, phòng, hợp đồng và luuHoaDonVaoDB giữ nguyên như file gốc ---
+    // Nhớ lấy maTK trong onCreate:
+// SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
+// int maTK = prefs.getInt("MaTK", -1);
+
     private void hienDialogChonNhaTro() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Chọn nhà trọ");
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_danh_sach, null);
 
-        LinearLayout dialogLayout = new LinearLayout(this);
-        dialogLayout.setOrientation(LinearLayout.VERTICAL);
-        dialogLayout.setPadding(30, 20, 30, 20);
+        TextView txtTieuDeDialog = dialogView.findViewById(R.id.txtTieuDeDialog);
+        EditText edtSearch = dialogView.findViewById(R.id.edtSearch);
+        LinearLayout container = dialogView.findViewById(R.id.layoutContainerDialog);
+        TextView btnHuy = dialogView.findViewById(R.id.btnHuyDialog);
 
-        EditText edtSearch = new EditText(this);
+        txtTieuDeDialog.setText("Chọn nhà trọ");
         edtSearch.setHint("Tìm tên hoặc địa chỉ nhà trọ...");
-        edtSearch.setPadding(24, 20, 24, 20);
-        edtSearch.setBackgroundResource(R.drawable.bg_edittext);
-        edtSearch.setTextSize(14);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, 0, 16);
-        dialogLayout.addView(edtSearch, params);
 
-        ScrollView scrollView = new ScrollView(this);
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        scrollView.addView(container);
-        dialogLayout.addView(scrollView);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
 
-        builder.setView(dialogLayout);
-        builder.setNegativeButton("Hủy", null);
-        AlertDialog dialog = builder.create();
+        btnHuy.setOnClickListener(v -> dialog.dismiss());
 
         loadDanhSachNhaTro(container, dialog, "");
 
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 loadDanhSachNhaTro(container, dialog, s.toString().trim());
             }
+
             @Override
             public void afterTextChanged(Editable s) {}
         });
@@ -309,16 +309,23 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         container.removeAllViews();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        String sql = "SELECT DISTINCT nt.MaNhaTro, nt.TenNhaTro, nt.DiaChi FROM NHATRO nt " +
-                "JOIN PHONG p ON nt.MaNhaTro = p.MaNhaTro " +
-                "JOIN HOPDONG hd ON p.MaPhong = hd.MaPhong " +
-                "WHERE hd.TrangThai = 'Còn hiệu lực'";
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT nt.MaNhaTro, nt.TenNhaTro, nt.DiaChi FROM NHATRO nt " +
+                        "JOIN PHONG p ON nt.MaNhaTro = p.MaNhaTro " +
+                        "JOIN HOPDONG hd ON p.MaPhong = hd.MaPhong " +
+                        "WHERE hd.TrangThai = 'Còn hiệu lực' AND nt.MaTK = ?"
+        );
+        java.util.List<String> args = new java.util.ArrayList<>();
+        args.add(String.valueOf(maTK));
 
         if (!keyword.isEmpty()) {
-            sql += " AND (nt.TenNhaTro LIKE '%" + keyword + "%' OR nt.DiaChi LIKE '%" + keyword + "%')";
+            sql.append(" AND (nt.TenNhaTro LIKE ? OR nt.DiaChi LIKE ?)");
+            String pattern = "%" + keyword + "%";
+            args.add(pattern);
+            args.add(pattern);
         }
 
-        Cursor cursor = db.rawQuery(sql, null);
+        Cursor cursor = db.rawQuery(sql.toString(), args.toArray(new String[0]));
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 int maNhaTro = cursor.getInt(0);
@@ -349,42 +356,33 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
     }
 
     private void hienDialogChonPhong(int maNhaTro, String tenNhaTro) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Chọn phòng (" + tenNhaTro + ")");
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_danh_sach, null);
 
-        LinearLayout dialogLayout = new LinearLayout(this);
-        dialogLayout.setOrientation(LinearLayout.VERTICAL);
-        dialogLayout.setPadding(30, 20, 30, 20);
+        TextView txtTieuDeDialog = dialogView.findViewById(R.id.txtTieuDeDialog);
+        EditText edtSearch = dialogView.findViewById(R.id.edtSearch);
+        LinearLayout container = dialogView.findViewById(R.id.layoutContainerDialog);
+        TextView btnHuy = dialogView.findViewById(R.id.btnHuyDialog);
 
-        EditText edtSearch = new EditText(this);
+        txtTieuDeDialog.setText("Chọn phòng (" + tenNhaTro + ")");
         edtSearch.setHint("Tìm tên phòng...");
-        edtSearch.setPadding(24, 20, 24, 20);
-        edtSearch.setBackgroundResource(R.drawable.bg_edittext);
-        edtSearch.setTextSize(14);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, 0, 16);
-        dialogLayout.addView(edtSearch, params);
 
-        ScrollView scrollView = new ScrollView(this);
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        scrollView.addView(container);
-        dialogLayout.addView(scrollView);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
 
-        builder.setView(dialogLayout);
-        builder.setNegativeButton("Hủy", null);
-        AlertDialog dialog = builder.create();
+        btnHuy.setOnClickListener(v -> dialog.dismiss());
 
         loadDanhSachPhong(maNhaTro, container, dialog, "");
 
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 loadDanhSachPhong(maNhaTro, container, dialog, s.toString().trim());
             }
+
             @Override
             public void afterTextChanged(Editable s) {}
         });
@@ -396,15 +394,21 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         container.removeAllViews();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        String sql = "SELECT p.MaPhong, p.TenPhong, hd.GiaPhong, hd.MaHopDong, hd.PhiInternet, hd.PhiDichVu, hd.DonGiaDien, hd.DonGiaNuoc FROM PHONG p " +
-                "JOIN HOPDONG hd ON p.MaPhong = hd.MaPhong " +
-                "WHERE p.MaNhaTro = " + maNhaTro + " AND hd.TrangThai = 'Còn hiệu lực'";
+        StringBuilder sql = new StringBuilder(
+                "SELECT p.MaPhong, p.TenPhong, hd.GiaPhong, hd.MaHopDong, hd.PhiInternet, hd.PhiDichVu, hd.DonGiaDien, hd.DonGiaNuoc " +
+                        "FROM PHONG p " +
+                        "JOIN HOPDONG hd ON p.MaPhong = hd.MaPhong " +
+                        "WHERE p.MaNhaTro = ? AND hd.TrangThai = 'Còn hiệu lực'"
+        );
+        java.util.List<String> args = new java.util.ArrayList<>();
+        args.add(String.valueOf(maNhaTro));
 
         if (!keyword.isEmpty()) {
-            sql += " AND p.TenPhong LIKE '%" + keyword + "%'";
+            sql.append(" AND p.TenPhong LIKE ?");
+            args.add("%" + keyword + "%");
         }
 
-        Cursor cursor = db.rawQuery(sql, null);
+        Cursor cursor = db.rawQuery(sql.toString(), args.toArray(new String[0]));
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 int maPhong = cursor.getInt(0);
