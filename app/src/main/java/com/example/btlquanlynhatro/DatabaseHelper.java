@@ -780,6 +780,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("ThanhTien", soLuong * donGia);
         db.insert("CHITIETHOADON", null, values);
     }
+    public void capNhatHoaDonQuaHan() {
+        SQLiteDatabase db = getWritableDatabase();
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+        sdf.setLenient(false);
+
+        java.util.Calendar todayCal = java.util.Calendar.getInstance();
+        todayCal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        todayCal.set(java.util.Calendar.MINUTE, 0);
+        todayCal.set(java.util.Calendar.SECOND, 0);
+        todayCal.set(java.util.Calendar.MILLISECOND, 0);
+        java.util.Date today = todayCal.getTime();
+
+        Cursor c = db.rawQuery(
+                "SELECT MaHD, HanThanhToan FROM HOADON WHERE TrangThai = 'Chưa thanh toán' AND HanThanhToan IS NOT NULL AND TRIM(HanThanhToan) != ''",
+                null
+        );
+
+        if (c != null) {
+            try {
+                while (c.moveToNext()) {
+                    String maHD = c.getString(0);
+                    String hanStr = c.getString(1).trim();
+                    try {
+                        java.util.Date hanDate = sdf.parse(hanStr);
+                        if (hanDate != null && hanDate.before(today)) {
+                            ContentValues cv = new ContentValues();
+                            cv.put("TrangThai", "Quá hạn");
+                            db.update("HOADON", cv, "MaHD = ?", new String[]{maHD});
+                        }
+                    } catch (Exception ignored) {
+                        // Bỏ qua nếu định dạng ngày cũ không chuẩn dd/MM/yyyy
+                    }
+                }
+            } finally {
+                c.close();
+            }
+        }
+    }
 
     // Xử lý cho Preferences
     public int getTongSoPhongByChuTro(int maTK) {

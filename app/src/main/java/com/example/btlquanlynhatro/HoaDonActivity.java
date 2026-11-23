@@ -276,5 +276,8 @@ public class HoaDonActivity extends AppCompatActivity {
         super.onResume();
         String currentKeyword = (edtSearchHoaDon != null) ? edtSearchHoaDon.getText().toString().trim() : "";
         loadDanhSachHoaDon(currentKeyword);
+        if (dbHelper != null) {
+            dbHelper.capNhatHoaDonQuaHan();
+        }
     }
 }

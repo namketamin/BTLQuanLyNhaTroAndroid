@@ -1,6 +1,8 @@
 package com.example.btlquanlynhatro;
 
+import android.app.DatePickerDialog;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -11,10 +13,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,7 +22,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class ThemSuaHoaDonActivity extends AppCompatActivity {
@@ -49,6 +52,7 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         setContentView(R.layout.activity_them_sua_hoa_don);
 
         dbHelper = new DatabaseHelper(this);
+        dbHelper.capNhatHoaDonQuaHan();
 
         SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
         maTK = prefs.getInt("MaTK", -1);
@@ -72,7 +76,7 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         edtTienInternet = findViewById(R.id.edtTienInternet);
         edtTienDichVu = findViewById(R.id.edtTienDichVu);
         edtHanThanhToan = findViewById(R.id.edtHanThanhToan);
-        btnLuuNhap = findViewById(R.id.btnLuuNháp);
+        btnLuuNhap = findViewById(R.id.btnLuuNhap);
         btnXacNhanHoaDon = findViewById(R.id.btnXacNhanHoaDon);
 
         btnBack.setOnClickListener(v -> {
@@ -206,10 +210,16 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                 return;
             }
 
+            String hanThanhToan = edtHanThanhToan.getText().toString().trim();
+            if (!hanThanhToan.isEmpty() && isNgayQuaKhu(hanThanhToan)) {
+                Toast.makeText(this, "Hạn thanh toán không được là ngày trong quá khứ!", Toast.LENGTH_SHORT).show();
+                edtHanThanhToan.requestFocus();
+                return;
+            }
+
             double tienPhong = parseDoubleSafe(edtTienPhong.getText().toString());
             double tienInternet = parseDoubleSafe(edtTienInternet.getText().toString());
             double tienDichVu = parseDoubleSafe(edtTienDichVu.getText().toString());
-            String hanThanhToan = edtHanThanhToan.getText().toString().trim();
 
             double soDien = dienCuoi - dienDau;
             double tienDien = soDien * donGiaDienHD;
@@ -229,6 +239,10 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                 hdValues.put("NuocCuoi", nuocCuoi);
                 hdValues.put("TongTien", tongTien);
                 hdValues.put("HanThanhToan", hanThanhToan);
+
+                if ("Quá hạn".equals(trangThaiHienTai) && !hanThanhToan.isEmpty() && !isNgayQuaKhu(hanThanhToan)) {
+                    hdValues.put("TrangThai", "Chưa thanh toán");
+                }
 
                 int updated = db.update("HOADON", hdValues, "MaHD = ?", new String[]{maHoaDonEdit});
                 if (updated <= 0) {
@@ -264,11 +278,6 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         ct.put("ThanhTien", thanhTien);
         db.insert("CHITIETHOADON", null, ct);
     }
-
-    // --- Các hàm chọn nhà trọ, phòng, hợp đồng và luuHoaDonVaoDB giữ nguyên như file gốc ---
-    // Nhớ lấy maTK trong onCreate:
-// SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
-// int maTK = prefs.getInt("MaTK", -1);
 
     private void hienDialogChonNhaTro() {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_danh_sach, null);
@@ -315,7 +324,7 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                         "JOIN HOPDONG hd ON p.MaPhong = hd.MaPhong " +
                         "WHERE hd.TrangThai = 'Còn hiệu lực' AND nt.MaTK = ?"
         );
-        java.util.List<String> args = new java.util.ArrayList<>();
+        List<String> args = new ArrayList<>();
         args.add(String.valueOf(maTK));
 
         if (!keyword.isEmpty()) {
@@ -400,7 +409,7 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                         "JOIN HOPDONG hd ON p.MaPhong = hd.MaPhong " +
                         "WHERE p.MaNhaTro = ? AND hd.TrangThai = 'Còn hiệu lực'"
         );
-        java.util.List<String> args = new java.util.ArrayList<>();
+        List<String> args = new ArrayList<>();
         args.add(String.valueOf(maNhaTro));
 
         if (!keyword.isEmpty()) {
@@ -491,6 +500,13 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                 return;
             }
 
+            String hanThanhToan = edtHanThanhToan.getText().toString().trim();
+            if (!hanThanhToan.isEmpty() && isNgayQuaKhu(hanThanhToan)) {
+                Toast.makeText(this, "Hạn thanh toán không được là ngày trong quá khứ!", Toast.LENGTH_SHORT).show();
+                edtHanThanhToan.requestFocus();
+                return;
+            }
+
             String kyThangStr = edtKyThang.getText().toString().trim();
             double tienPhong = parseDoubleSafe(edtTienPhong.getText().toString());
             double tienInternet = parseDoubleSafe(edtTienInternet.getText().toString());
@@ -506,7 +522,7 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                 Toast.makeText(this, "Phòng này đã có hóa đơn kỳ " + thang + "/" + nam + " rồi!", Toast.LENGTH_LONG).show();
                 return;
             }
-            
+
             double soDienTieuThu = dienCuoi - dienDau;
             double tienDien = soDienTieuThu * donGiaDienHD;
 
@@ -522,6 +538,14 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
                     tienInternet, tienDichVu,
                     tongTien, trangThai
             );
+
+            if (success && !hanThanhToan.isEmpty()) {
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                ContentValues cv = new ContentValues();
+                cv.put("HanThanhToan", hanThanhToan);
+                db.update("HOADON", cv, "MaHopDong = ? AND Thang = ? AND Nam = ?",
+                        new String[]{maHopDong, String.valueOf(thang), String.valueOf(nam)});
+            }
 
             if (success) {
                 Toast.makeText(this, "Lập hóa đơn thành công! Tổng: " + String.format("%,.0f đ", tongTien), Toast.LENGTH_LONG).show();
@@ -553,18 +577,46 @@ public class ThemSuaHoaDonActivity extends AppCompatActivity {
         return trung;
     }
 
+    private boolean isNgayQuaKhu(String ddMMyyyy) {
+        if (ddMMyyyy == null || ddMMyyyy.trim().isEmpty()) return false;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            sdf.setLenient(false);
+            Date target = sdf.parse(ddMMyyyy.trim());
+
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            return target != null && target.before(today.getTime());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private void showDatePicker(EditText edtTarget) {
-        java.util.Calendar calendar = java.util.Calendar.getInstance();
-        new android.app.DatePickerDialog(
+        Calendar calendar = Calendar.getInstance();
+        DatePickerDialog dialog = new DatePickerDialog(
                 this,
                 (datePicker, year, month, day) -> {
-                    String formattedDate = String.format(java.util.Locale.getDefault(), "%02d/%02d/%d", day, (month + 1), year);
+                    String formattedDate = String.format(Locale.getDefault(), "%02d/%02d/%d", day, (month + 1), year);
                     edtTarget.setText(formattedDate);
                 },
-                calendar.get(java.util.Calendar.YEAR),
-                calendar.get(java.util.Calendar.MONTH),
-                calendar.get(java.util.Calendar.DAY_OF_MONTH)
-        ).show();
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        Calendar minDay = Calendar.getInstance();
+        minDay.set(Calendar.HOUR_OF_DAY, 0);
+        minDay.set(Calendar.MINUTE, 0);
+        minDay.set(Calendar.SECOND, 0);
+        minDay.set(Calendar.MILLISECOND, 0);
+        dialog.getDatePicker().setMinDate(minDay.getTimeInMillis());
+
+        dialog.show();
     }
 
     private double parseDoubleSafe(String val) {

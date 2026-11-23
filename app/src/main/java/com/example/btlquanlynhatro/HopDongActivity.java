@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,7 +24,7 @@ public class HopDongActivity extends AppCompatActivity {
 
     private String type = ""; // Nhận diện: "CHUTRO", "PHONG", hoặc "NGUOITHUE"
     private int targetId = -1;
-    private int currentMaTK = 2; // Mã tài khoản chủ trọ đang đăng nhập
+    private int currentMaTK = -1; // Mã tài khoản chủ trọ đang đăng nhập
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +33,13 @@ public class HopDongActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        SharedPreferences prefs = getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
+        int prefsMaTK = prefs.getInt("MaTK", -1);
+
         // Nhận dữ liệu phân loại nguồn gọi từ Intent
         type = getIntent().getStringExtra("TYPE");
         targetId = getIntent().getIntExtra("TARGET_ID", -1);
-        currentMaTK = getIntent().getIntExtra("MA_TK", 2);
+        currentMaTK = getIntent().getIntExtra("MA_TK", -1);
 
         btnBack = findViewById(R.id.btnBack);
         edtSearchHopDong = findViewById(R.id.edtSearchHopDong);

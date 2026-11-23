@@ -297,7 +297,7 @@
         android:padding="16dp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLuuNháp"
+            android:id="@+id/btnLuuNhap"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_height="48dp"
