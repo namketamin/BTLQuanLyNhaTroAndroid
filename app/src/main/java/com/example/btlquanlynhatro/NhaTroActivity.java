@@ -71,7 +71,7 @@ public class NhaTroActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
-                hienThiDanhSach(s.toString());
+                loadDanhSachNhaTro(s.toString());
             }
 
             @Override
@@ -117,116 +117,53 @@ public class NhaTroActivity extends AppCompatActivity {
     }
 
     // Lấy danh sách nhà trọ từ SQLite
-    private void loadDanhSachNhaTro() {
+    private void loadDanhSachNhaTro(String tuKhoa) {
+        layoutDanhSachNhaTro.removeAllViews();
 
-        danhSachNhaTro.clear();
+        int maTK = getSharedPreferences("SoTroPrefs", MODE_PRIVATE).getInt("MaTK", -1);
+        Cursor cursor = dbHelper.getNhaTroByMaTK(maTK);
+        String keyword = tuKhoa == null ? "" : tuKhoa.toLowerCase().trim();
+        int count = 0;
 
-        SharedPreferences prefs =
-                getSharedPreferences("SoTroPrefs", MODE_PRIVATE);
-
-        int maTK = prefs.getInt("MaTK", -1);
-
-        if (maTK == -1) {
-            Toast.makeText(this,
-                    "Không tìm thấy tài khoản",
-                    Toast.LENGTH_SHORT).show();
-
-            hienThiDanhSach("");
-            return;
-        }
-
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        try (Cursor cursor = db.rawQuery(
-                "SELECT MaNhaTro, TenNhaTro, DiaChi " +
-                        "FROM NHATRO WHERE MaTK = ?",
-                new String[]{String.valueOf(maTK)}
-        )) {
-
+        if (cursor != null) {
             while (cursor.moveToNext()) {
-
                 int ma = cursor.getInt(0);
-
                 String ten = cursor.getString(1);
                 String diaChi = cursor.getString(2);
 
-                if (ten == null) ten = "";
-                if (diaChi == null) diaChi = "";
+                if (!keyword.isEmpty()
+                        && !(ten != null && ten.toLowerCase().contains(keyword))
+                        && !(diaChi != null && diaChi.toLowerCase().contains(keyword))) {
+                    continue;
+                }
 
-                danhSachNhaTro.add(
-                        new NhaTro(ma, ten, diaChi)
-                );
+                count++;
+                View card = getLayoutInflater().inflate(R.layout.item_nha_tro_card, layoutDanhSachNhaTro, false);
+                TextView txtTen = card.findViewById(R.id.txtTenNhaTroItem);
+                TextView txtDiaChi = card.findViewById(R.id.txtDiaChiItem);
+
+                txtTen.setText(ten);
+                txtDiaChi.setText(diaChi);
+
+                card.setOnClickListener(v -> {
+                    Intent intent = new Intent(NhaTroActivity.this, ChiTietNhaTroActivity.class);
+                    intent.putExtra("MaNhaTro", ma);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                });
+
+                layoutDanhSachNhaTro.addView(card);
             }
+            cursor.close();
         }
 
-        // Giữ từ khóa đang tìm kiếm khi tải lại danh sách
-        String tuKhoa = edtSearchNhaTro.getText().toString();
-
-        hienThiDanhSach(tuKhoa);
-    }
-
-    // Hiển thị danh sách nhà trọ
-    private void hienThiDanhSach(String tuKhoa) {
-
-        layoutDanhSachNhaTro.removeAllViews();
-
-        String keyword = tuKhoa.toLowerCase().trim();
-
-        int soKetQua = 0;
-
-        for (NhaTro nhaTro : danhSachNhaTro) {
-
-            // Kiểm tra từ khóa
-            if (!nhaTro.tenNhaTro.toLowerCase().contains(keyword)
-                    && !nhaTro.diaChi.toLowerCase().contains(keyword)) {
-                continue;
-            }
-
-            soKetQua++;
-
-            // 1. INFLATE CARD TỪ FILE XML
-            View card = LayoutInflater.from(this).inflate(R.layout.item_nha_tro_card, layoutDanhSachNhaTro, false);
-
-            // 2. ÁNH XẠ VIEW BÊN TRONG CARD
-            TextView txtTen = card.findViewById(R.id.txtTenNhaTroItem);
-            TextView txtDiaChi = card.findViewById(R.id.txtDiaChiItem);
-
-            // 3. ĐỔ DỮ LIỆU LÊN CARD
-            txtTen.setText(nhaTro.tenNhaTro);
-            txtDiaChi.setText(nhaTro.diaChi);
-
-            // 4. SỰ KIỆN NHẤN VÀO THẺ (CHUYỂN TRANG CHI TIẾT)
-            card.setOnClickListener(v -> {
-                Intent intent = new Intent(NhaTroActivity.this, ChiTietNhaTroActivity.class);
-                intent.putExtra("MaNhaTro", nhaTro.maNhaTro); // Truyền đúng mã nhà trọ qua để trang kia load phòng
-                startActivity(intent);
-                overridePendingTransition(0, 0); // Bỏ hiệu ứng lướt trang cho mượt
-            });
-
-            // Thêm thẻ vào danh sách container
-            layoutDanhSachNhaTro.addView(card);
-        }
-
-        // Không có kết quả
-        if (soKetQua == 0) {
-
+        if (count == 0) {
             TextView txtEmpty = new TextView(this);
-
-            if (danhSachNhaTro.isEmpty()) {
-                txtEmpty.setText("Bạn chưa có nhà trọ nào");
-            } else {
-                txtEmpty.setText("Không tìm thấy nhà trọ");
-            }
-
+            txtEmpty.setText("Không tìm thấy nhà trọ nào");
             txtEmpty.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
             txtEmpty.setTextColor(0xFF888888);
             txtEmpty.setGravity(Gravity.CENTER);
-
-            txtEmpty.setPadding(
-                    0, dp(24),
-                    0, dp(24)
-            );
-
+            txtEmpty.setPadding(0, dp(30), 0, dp(30));
             layoutDanhSachNhaTro.addView(txtEmpty);
         }
     }
@@ -235,7 +172,7 @@ public class NhaTroActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (dbHelper != null && layoutDanhSachNhaTro != null) {
-            loadDanhSachNhaTro();
+            loadDanhSachNhaTro("");
         }
     }
 }

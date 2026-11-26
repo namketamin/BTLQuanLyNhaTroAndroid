@@ -160,6 +160,11 @@ public class ChiTietNguoiThueActivity extends AppCompatActivity {
 
         // Nút Xóa người thuê
         btnXoaNguoiThue.setOnClickListener(v -> {
+            if (dbHelper.hasHopDongByNguoiThue(maNguoiThue)) {
+                Toast.makeText(this, "Không thể xóa! Người thuê này đã có hợp đồng.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             new AlertDialog.Builder(this)
                     .setTitle("Xác nhận xóa")
                     .setMessage("Bạn có chắc chắn muốn xóa người thuê này không?")

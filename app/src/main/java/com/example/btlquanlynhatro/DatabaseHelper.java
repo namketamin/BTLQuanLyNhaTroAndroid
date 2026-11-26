@@ -205,18 +205,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return vaiTro;
     }
 
-    // Thêm người thuê mới
-    public long insertNguoiThue(String hoTen, String cccd, String sdt, String ngaySinh, String queQuan) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("HoTen", hoTen);
-        values.put("CCCD", cccd);
-        values.put("SDT", sdt);
-        values.put("NgaySinh", ngaySinh);
-        values.put("QueQuan", queQuan);
-        return db.insert("NGUOITHUE", null, values);
-    }
-
     // Đếm tổng số phòng
     public int getTongSoPhong() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -366,7 +354,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return db.rawQuery(query.toString(), args.toArray(new String[0]));
     }
-
+    // Lấy all nhà trọ của tài khoản hiện tại
+    public Cursor getNhaTroByMaTK(int maTK) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery(
+                "SELECT MaNhaTro, TenNhaTro, DiaChi FROM NHATRO WHERE MaTK = ? ORDER BY MaNhaTro DESC",
+                new String[]{String.valueOf(maTK)}
+        );
+    }
     // Thêm phòng mới vào database
     public long insertPhong(int maNhaTro, String tenPhong, double dienTich, double giaPhong, String trangThai) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -378,6 +373,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("TrangThai", trangThai);
         return db.insert("PHONG", null, values);
     }
+
     //update phòng
     public boolean updatePhong(int maPhong, String tenPhong, double dienTich, double giaPhong, String trangThai) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -419,6 +415,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int rows = db.update("NHATRO", values, "MaNhaTro = ?", new String[]{String.valueOf(maNhaTro)});
         return rows > 0;
     }
+
     // NGƯỜI THUÊ
     // Lấy danh sách người thuê (có hỗ trợ tìm kiếm theo từ khóa)
     public Cursor getNguoiThue(String keyword) {
@@ -436,6 +433,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         query.append(" ORDER BY MaNguoiThue DESC");
         return db.rawQuery(query.toString(), args.toArray(new String[0]));
     }
+
+    // Thêm người thuê mới
+    public long insertNguoiThue(String hoTen, String cccd, String sdt, String ngaySinh, String queQuan) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("HoTen", hoTen);
+        values.put("CCCD", cccd);
+        values.put("SDT", sdt);
+        values.put("NgaySinh", ngaySinh);
+        values.put("QueQuan", queQuan);
+        return db.insert("NGUOITHUE", null, values);
+    }
+
+//    //ko động
+//// lấy người thuê đã xóa
+//    public Cursor getNguoiThueDaXoa(String keyword) {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        StringBuilder query = new StringBuilder("SELECT MaNguoiThue, HoTen, CCCD, SDT, NgaySinh, QueQuan FROM NGUOITHUE where is_deleted=1");
+//        List<String> args = new ArrayList<>();
+//
+//        query.append(" ORDER BY MaNguoiThue DESC");
+//        return db.rawQuery(query.toString(), args.toArray(new String[0]));
+//    }
+//    // khôi phục
+//    public boolean updateNguoiThueKhoiPhuc(int maNguoiThue) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues values = new ContentValues();
+//        values.put("is_deleted", 0);
+//        int rows = db.update("NGUOITHUE", values, "MaNguoiThue = ?", new String[]{String.valueOf(maNguoiThue)});
+//        return rows > 0;
+//    }
 
     // Lấy thông tin 1 người thuê theo MaNguoiThue
     public Cursor getNguoiThueById(int maNguoiThue) {
@@ -460,6 +488,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean deleteNguoiThue(int maNguoiThue) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rows = db.delete("NGUOITHUE", "MaNguoiThue = ?", new String[]{String.valueOf(maNguoiThue)});
+//        ContentValues values = new ContentValues();
+//        values.put("is_deleted", 1);
+//        int rows = db.update("NGUOITHUE", values, "MaNguoiThue = ?", new String[]{String.valueOf(maNguoiThue)});
         return rows > 0;
     }
 
@@ -473,6 +504,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return db.rawQuery(query, new String[]{k, k, k});
         }
         return db.rawQuery(query, null);
+    }
+
+    // Xem người thuê có hợp đồng ko
+    public boolean hasHopDongByNguoiThue(int maNguoiThue) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT 1 FROM HOPDONG WHERE MaNguoiThue = ? LIMIT 1",
+                new String[]{String.valueOf(maNguoiThue)}
+        );
+        boolean exists = false;
+        if (cursor != null) {
+            exists = cursor.moveToFirst();
+            cursor.close();
+        }
+        return exists;
     }
 
     // PHÒNG TRỌ
@@ -559,8 +605,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // lấy thông tin hợp đồng theo mã hđ
     public Cursor getHopDongChiTietByMaHD(String maHopDong) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT h.MaHopDong, h.TrangThai, p.TenPhong, h.MaNguoiThue, nt.HoTen, nt.SDT, nt.CCCD, " +
-                "h.NgayBatDau, h.NgayKetThuc, h.GiaPhong, h.DonGiaDien, h.DonGiaNuoc, h.PhiInternet, h.PhiDichVu, h.TienCoc, p.MaPhong " +
+        String query = "SELECT h.MaHopDong, h.TrangThai, p.TenPhong, nt.MaNguoiThue, " +
+                "nt.HoTen, nt.SDT, nt.CCCD, h.NgayBatDau, h.NgayKetThuc, " +
+                "h.GiaPhong, h.DonGiaDien, h.DonGiaNuoc, h.PhiInternet, " +
+                "h.PhiDichVu, h.TienCoc, p.MaPhong " +
                 "FROM HOPDONG h " +
                 "JOIN PHONG p ON h.MaPhong = p.MaPhong " +
                 "JOIN NGUOITHUE nt ON h.MaNguoiThue = nt.MaNguoiThue " +
@@ -819,7 +867,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // Xử lý cho Preferences
+    // XỬ LÝ CHO PREFS
     public int getTongSoPhongByChuTro(int maTK) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(
@@ -881,7 +929,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "JOIN HOPDONG hd ON h.MaHopDong = hd.MaHopDong " +
                         "JOIN PHONG p ON hd.MaPhong = p.MaPhong " +
                         "JOIN NHATRO nt ON p.MaNhaTro = nt.MaNhaTro " +
-                        "WHERE nt.MaTK = ? AND h.TrangThai = 'Chưa thanh toán'",
+                        "WHERE nt.MaTK = ? AND h.TrangThai IN ('Chưa thanh toán', 'Quá hạn')",
                 new String[]{String.valueOf(maTK)}
         );
         double total = 0;

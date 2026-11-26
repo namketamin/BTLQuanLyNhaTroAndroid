@@ -145,16 +145,13 @@ public class ChiTietHopDongActivity extends AppCompatActivity {
                     .setTitle("Xác nhận kết thúc hợp đồng")
                     .setMessage("Bạn có chắc chắn muốn kết thúc hợp đồng này? Phòng sẽ chuyển về trạng thái 'Còn trống'.")
                     .setPositiveButton("Xác nhận", (dialog, which) -> {
-                        // 1. Cập nhật trạng thái hợp đồng thành "Đã kết thúc" (hoặc hủy hiệu lực tùy logic bảng của cậu)
-                        // 2. Đồng thời cập nhật trạng thái phòng trọ về lại "Còn trống"
-
-                        // (Ví dụ gọi hàm update trong DatabaseHelper):
                         boolean updateHD = dbHelper.updateTrangThaiHopDong(maHopDongHienTai, "Đã kết thúc");
-                        boolean updatePhong = dbHelper.updateTrangThaiPhong(maPhong, "Còn trống");
+                        boolean updatePhong = (maPhong != -1) && dbHelper.updateTrangThaiPhong(maPhong, "Còn trống");
 
-                        if (updateHD || updatePhong) {
+                        if (updateHD && (maPhong == -1 || updatePhong)) {
                             Toast.makeText(this, "Đã kết thúc hợp đồng thành công!", Toast.LENGTH_SHORT).show();
-                            finish(); // Đóng màn hình chi tiết, quay lại danh sách phòng
+                            finish();
+                            overridePendingTransition(0, 0);
                         } else {
                             Toast.makeText(this, "Kết thúc hợp đồng thất bại!", Toast.LENGTH_SHORT).show();
                         }
@@ -223,6 +220,9 @@ public class ChiTietHopDongActivity extends AppCompatActivity {
                     double phiInternet = cursor.getDouble(12);
                     double phiDichVu = cursor.getDouble(13);
                     double tienCoc = cursor.getDouble(14);
+                    if (cursor.getColumnCount() > 15 && !cursor.isNull(15)) {
+                        maPhong = cursor.getInt(15);
+                    }
 
                     NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 

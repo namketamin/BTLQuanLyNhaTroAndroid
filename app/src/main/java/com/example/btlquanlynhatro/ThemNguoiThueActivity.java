@@ -40,19 +40,33 @@ public class ThemNguoiThueActivity extends AppCompatActivity {
             overridePendingTransition(0, 0);
         });
 
-        // Xử lý khi bấm vào ô Ngày sinh -> Bật lịch chọn ngày
-        edtNgaySinh.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
+//        // Xử lý khi bấm vào ô Ngày sinh -> Bật lịch chọn ngày
+//        edtNgaySinh.setOnClickListener(v -> {
+//            Calendar calendar = Calendar.getInstance();
+//            int year = calendar.get(Calendar.YEAR);
+//            int month = calendar.get(Calendar.MONTH);
+//            int day = calendar.get(Calendar.DAY_OF_MONTH);
+//
+//            DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
+//                String dateStr = (dayOfMonth < 10 ? "0" + dayOfMonth : dayOfMonth) + "/" +
+//                        ((month1 + 1) < 10 ? "0" + (month1 + 1) : (month1 + 1)) + "/" + year1;
+//                edtNgaySinh.setText(dateStr);
+//            }, year, month, day);
+//            datePickerDialog.show();
+//        });
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
-                String dateStr = (dayOfMonth < 10 ? "0" + dayOfMonth : dayOfMonth) + "/" +
-                        ((month1 + 1) < 10 ? "0" + (month1 + 1) : (month1 + 1)) + "/" + year1;
-                edtNgaySinh.setText(dateStr);
-            }, year, month, day);
-            datePickerDialog.show();
+        edtNgaySinh.setOnTouchListener((v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                android.graphics.drawable.Drawable drawableEnd = edtNgaySinh.getCompoundDrawablesRelative()[2];
+                if (drawableEnd == null) {
+                    drawableEnd = edtNgaySinh.getCompoundDrawables()[2];
+                }
+                if (drawableEnd != null && event.getRawX() >= (edtNgaySinh.getRight() - drawableEnd.getBounds().width() - edtNgaySinh.getPaddingEnd())) {
+                    showNgaySinhPicker();
+                    return true;
+                }
+            }
+            return false;
         });
 
         // Nút Lưu người thuê
@@ -132,5 +146,35 @@ public class ThemNguoiThueActivity extends AppCompatActivity {
                 edtCCCD.requestFocus();
             }
         });
+    }
+    private void showNgaySinhPicker() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // Nếu ô đang có ngày hợp lệ dd/MM/yyyy thì lấy làm ngày mặc định trên lịch
+        String currentText = edtNgaySinh.getText().toString().trim();
+        if (!currentText.isEmpty()) {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                sdf.setLenient(false);
+                java.util.Date parsed = sdf.parse(currentText);
+                if (parsed != null) {
+                    calendar.setTime(parsed);
+                    year = calendar.get(Calendar.YEAR);
+                    month = calendar.get(Calendar.MONTH);
+                    day = calendar.get(Calendar.DAY_OF_MONTH);
+                }
+            } catch (java.text.ParseException ignored) {
+            }
+        }
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
+            String dateStr = (dayOfMonth < 10 ? "0" + dayOfMonth : dayOfMonth) + "/" +
+                    ((month1 + 1) < 10 ? "0" + (month1 + 1) : (month1 + 1)) + "/" + year1;
+            edtNgaySinh.setText(dateStr);
+        }, year, month, day);
+        datePickerDialog.show();
     }
 }
